@@ -9,9 +9,14 @@ from tempai import *
 import time
 from API import token
 from help import help_info
+from database import *
 
 # токен бота
 bot = telebot.TeleBot(token)
+
+
+#проверка существавания базы данных
+check_and_create_db()
 
 
 #опрос этой недели
@@ -22,8 +27,27 @@ def this_week_poll(message):
 
 # опрос след. недели
 @bot.message_handler(commands=['next_week_poll'])
-def this_week_poll(message):
+def next_week_poll(message):
 	bot.send_poll(message.chat.id, 'Играем?', next_week(), is_anonymous = False, allows_multiple_answers = True, message_thread_id= message.message_thread_id)
+
+
+#прикрепление ссылки на рейтинг
+@bot.message_handler(commands=['add_rating_link'])
+def add_rating_link(message):
+	#ищем первое числовое значение в строке рейтинга (оно единственное) и записываем в переменную
+	try:
+		pantheon_id = [int(part) for part in message.text.split('/') if part.isdigit()][0]
+		check_chat = fetch_one(f"SELECT chat_id FROM chats WHERE chat_id = {message.chat.id}")
+	        
+		if not check_chat:
+	    # Добавляем чат, если его нет
+			simple_execute(f"INSERT INTO chats (chat_id, chat_only_mod) VALUES ({message.chat.id}, 0)")
+			bot.send_message(message.chat.id, 'Ссылка добавлена', message_thread_id= message.message_thread_id)
+		pantheon_name = get_rating_name(pantheon_id)
+		simple_execute(f"INSERT INTO links (chat_id, pantheon_id, pantheon_name, pantheon_sorting, pantheon_filter) VALUES ({message.chat.id}, {pantheon_id}, '{pantheon_name}', 'rating', NULL)")
+		bot.send_message(message.chat.id, 'Ссылка добавлена', message_thread_id= message.message_thread_id)
+	except:
+		bot.send_message(message.chat.id, 'добавить рейтинг не удалось!', message_thread_id= message.message_thread_id)
 
 
 #вывод списка команд
