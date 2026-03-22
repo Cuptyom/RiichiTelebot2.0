@@ -31,6 +31,22 @@ def next_week_poll(message):
 	bot.send_poll(message.chat.id, 'Играем?', next_week(), is_anonymous = False, allows_multiple_answers = True, message_thread_id= message.message_thread_id)
 
 
+# большой опрос этой. недели
+@bot.message_handler(commands=['this_week_poll_ex'])
+def this_week_poll_ex(message):
+	for i in range(7):
+		data = this_day(i)
+		bot.send_poll(message.chat.id, data[0], data[1:], is_anonymous = False, allows_multiple_answers = True, message_thread_id= message.message_thread_id)
+
+
+# большой опрос след. недели
+@bot.message_handler(commands=['next_week_poll_ex'])
+def next_week_poll_ex(message):
+	for i in range(7, 14):
+		data = this_day(i)
+		bot.send_poll(message.chat.id, data[0], data[1:], is_anonymous = False, allows_multiple_answers = True, message_thread_id= message.message_thread_id)
+
+
 #прикрепление ссылки на рейтинг
 @bot.message_handler(commands=['add_rating_link'])
 def add_rating_link(message):

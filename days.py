@@ -21,6 +21,13 @@ def next_week():
 	n += ['я не смогу', 'играю не все дни']
 	return n
 
+#текущая дата со смещением
+def this_day(step = 0):
+    date = datetime.now() - timedelta(days = datetime.now().weekday() - step)
+    date = f'{date.day}.{date.month} - {week_day(date)}'
+    poll_info = [date, 'Смогу играть весь день!', 'Смогу только днём!', 'Смогу только вечером!', 'Возможно смогу, но не точно!', 'Точно не смогу!']
+    return poll_info
+
 #функция для перевода дней недели на русский
 def week_day(data):
 	a = data.weekday()
@@ -30,14 +37,3 @@ def week_day(data):
 			a = names[names.index(i)]
 			break
 	return a
-# функции next_week и this_week() возвращают массив строк.
-#['16.3 - Понедельник', '17.3 - Вторник', '18.3 - Среда', '19.3 - Четверг', '20.3 - Пятница', '21.3 - Суббота', '22.3 - Воскресенье', 'я не смогу', 'играю не все дни']
-
-#код для бота
-#@bot.message_handler(commands=['this_week_poll'])
-#def this_week_poll(message):
-#    bot.send_poll(message.chat.id, 'Играем?', this_week(), is_anonymous = False, allows_multiple_answers = True, message_thread_id= message.message_thread_id)
-# опрос след. недели
-#@bot.message_handler(commands=['next_week_poll'])
-#def this_week_poll(message):
-#	bot.send_poll(message.chat.id, 'Играем?', next_week(), is_anonymous = False, allows_multiple_answers = True, message_thread_id= message.message_thread_id)
