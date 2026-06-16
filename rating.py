@@ -6,7 +6,7 @@ user = fake_useragent.UserAgent().random
 header = {"user-agent": user}
 def rating_parser(a, sort, filter):
 	try:
-		link = a
+		link = f'https://rating.riichimahjong.org/event/{a}/order/rating'
 		if sort =="":
 			link = a
 		elif sort == "avg_score":

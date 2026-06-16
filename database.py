@@ -79,7 +79,6 @@ def check_and_create_db():
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS chats (
                 chat_id INTEGER UNIQUE NOT NULL,
-                chat_only_mod INTEGER DEFAULT 0 NOT NULL,
                 PRIMARY KEY (chat_id)
             )
         ''')
@@ -102,8 +101,8 @@ def check_and_create_db():
             CREATE TABLE IF NOT EXISTS weekly_poll (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 chat_id INTEGER NOT NULL,
+                topic_id INTEGER,
                 poll_type VARCHAR NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (chat_id) REFERENCES chats (chat_id)
             )
         ''')
@@ -128,7 +127,6 @@ def check_and_create_db():
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS chats (
                 chat_id INTEGER UNIQUE NOT NULL,
-                chat_only_mod INTEGER DEFAULT 0 NOT NULL,
                 PRIMARY KEY (chat_id)
             )
         ''')
@@ -151,8 +149,8 @@ def check_and_create_db():
             CREATE TABLE IF NOT EXISTS weekly_poll (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 chat_id INTEGER NOT NULL,
+                topic_id INTEGER,
                 poll_type VARCHAR NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (chat_id) REFERENCES chats (chat_id)
             )
         ''')

@@ -10,9 +10,8 @@ yaku = [
     "Chihou","Daburu riichi","Menzentsumo","Tanyao","Iipeikou","Sanshoku doukou","Yakuhai x2","Toitoi","Sanankou","Houtei raoyui","Chankan","Suuankou","Daisuushii","Chinitsu",
     "Kokushi musou","Open riichi","Chiitoitsu","Chanta","Ryanpeikou","Ittsu","Yakuhai x3","Honitsu","Shousangen","Haitei","Renhou","Daisangen","Tsuuiisou","Chuuren poutou", "Tenhou"
         ]
-def panteon_stat(getted_link):
+def yaku_stat(getted_id):
     try:
-        getted_id = getted_link[39:-13]
         link = f"https://rating.riichimahjong.org/event/{getted_id}/games/page/1"
         responce = requests.get(link, headers = header).text
         soup = BeautifulSoup(responce, "lxml")
