@@ -6,7 +6,7 @@ import os
 db_file = 'bot_database.db'  # имя файла базы данных
 
 # функция для простых запросов не требующих возврата данных
-def simple_execute(sql):
+def simple_execute(sql, params=()):
     """
     Выполняет SQL запрос без возврата данных
     """
@@ -14,17 +14,18 @@ def simple_execute(sql):
     try:
         conn = sqlite3.connect(db_file)
         cursor = conn.cursor()
-        cursor.execute(sql)
+        cursor.execute(sql, params)
         conn.commit()
         conn.close()
         return True
     except Exception as e:
         print(f"Ошибка в simple_execute: {e}")
         print(f"SQL запрос: {sql}")
+        print(f"Параметры: {params}")
         return False
 
 # функция для запросов с возвратом данных
-def fetch_one(sql):
+def fetch_one(sql, params=()):
     """
     Выполняет SQL запрос и возвращает одну запись
     """
@@ -32,16 +33,18 @@ def fetch_one(sql):
     try:
         conn = sqlite3.connect(db_file)
         cursor = conn.cursor()
-        cursor.execute(sql)
+        cursor.execute(sql, params)
         result = cursor.fetchone()
         conn.close()
         return result
     except Exception as e:
         print(f"Ошибка в fetch_one: {e}")
+        print(f"SQL запрос: {sql}")
+        print(f"Параметры: {params}")
         return None
 
 # функция для запросов с возвратом всех данных
-def fetch_all(sql):
+def fetch_all(sql, params=()):
     """
     Выполняет SQL запрос и возвращает все записи
     """
@@ -49,12 +52,14 @@ def fetch_all(sql):
     try:
         conn = sqlite3.connect(db_file)
         cursor = conn.cursor()
-        cursor.execute(sql)
+        cursor.execute(sql, params)
         result = cursor.fetchall()
         conn.close()
         return result
     except Exception as e:
         print(f"Ошибка в fetch_all: {e}")
+        print(f"SQL запрос: {sql}")
+        print(f"Параметры: {params}")
         return None
 
 # остальной код check_and_create_db() без изменений...

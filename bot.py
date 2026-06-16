@@ -12,7 +12,6 @@ from help import help_info
 from database import *
 import schedule
 import threading
-import time
 
 # токен бота
 bot = telebot.TeleBot(token)
@@ -23,28 +22,31 @@ bot = telebot.TeleBot(token)
 check_and_create_db()
 
 def add_this_chat_if_not_exist(chat_id):
-	check_chat = fetch_one(f"SELECT chat_id FROM chats WHERE chat_id = {chat_id}")        
+	check_chat = fetch_one("SELECT chat_id FROM chats WHERE chat_id = ?", (chat_id,))        
 	if not check_chat:
     # Добавляем чат, если его нет
-		simple_execute(f"INSERT INTO chats (chat_id) VALUES ({chat_id})")
+		simple_execute("INSERT INTO chats (chat_id) VALUES (?)", (chat_id,))
 
 #функция, проверяющая времяд для опросов
 def send_weekly_polls_in_chats():
-	chats = fetch_all(f'SELECT chat_id, topic_id, poll_type FROM weekly_poll')
-	for chat in chats:
-		time.sleep(1) #чтобы не нагружать слабую машину
-		if chat[2] == 'normal':
-			bot.send_poll(chat[0], 'Играем?', this_week(), is_anonymous = False, allows_multiple_answers = True, message_thread_id= chat[1])
-		else:
-			for i in range(7):
-				data = this_day(i)
-				bot.send_poll(chat[0], data[0], data[1:], is_anonymous = False, allows_multiple_answers = True, message_thread_id= chat[1])
+	try:
+		chats = fetch_all("SELECT chat_id, topic_id, poll_type FROM weekly_poll")
+		for chat in chats:
+			time.sleep(1) #чтобы не нагружать слабую машину
+			if chat[2] == 'normal':
+				bot.send_poll(chat[0], 'Играем?', this_week(), is_anonymous = False, allows_multiple_answers = True, message_thread_id= chat[1])
+			else:
+				for i in range(7):
+					data = this_day(i)
+					bot.send_poll(chat[0], data[0], data[1:], is_anonymous = False, allows_multiple_answers = True, message_thread_id= chat[1])
+	except:
+		pass
 #шедулер для проверки времени
 def scheduler():
     """Запускает планировщик в отдельном потоке."""
-    #schedule.every().monday.at("00:01").do(send_weekly_polls_in_chats)
+    schedule.every().monday.at("00:01").do(send_weekly_polls_in_chats)
     # Для отладки можно раскомментировать:
-    schedule.every(1).minutes.do(send_weekly_polls_in_chats)
+    #schedule.every(1).minutes.do(send_weekly_polls_in_chats)
     while True:
         schedule.run_pending()
         time.sleep(10)
@@ -89,7 +91,7 @@ def add_rating_link(message):
 		add_this_chat_if_not_exist(message.chat.id)
 		pantheon_id = [int(part) for part in message.text.split('/') if part.isdigit()][0]
 		pantheon_name = get_rating_name(pantheon_id)
-		simple_execute(f"INSERT INTO links (chat_id, pantheon_id, pantheon_name, pantheon_sorting, pantheon_filter) VALUES ({message.chat.id}, {pantheon_id}, '{pantheon_name}', 'rating', NULL)")
+		simple_execute("INSERT INTO links (chat_id, pantheon_id, pantheon_name, pantheon_sorting, pantheon_filter) VALUES (?, ?, ?, 'rating', NULL)", (message.chat.id, pantheon_id, pantheon_name))
 		bot.send_message(message.chat.id, 'Ссылка добавлена', message_thread_id= message.message_thread_id)
 	except:
 		bot.send_message(message.chat.id, 'добавить рейтинг не удалось!', message_thread_id= message.message_thread_id)
@@ -100,7 +102,7 @@ def add_rating_link(message):
 def show_rating_table(message):
 	#try:
 		add_this_chat_if_not_exist(message.chat.id)
-		ratings_list = fetch_all(F'SELECT pantheon_name, pantheon_id, pantheon_sorting, pantheon_filter FROM links WHERE chat_id = {message.chat.id}')
+		ratings_list = fetch_all("SELECT pantheon_name, pantheon_id, pantheon_sorting, pantheon_filter FROM links WHERE chat_id = ?", (message.chat.id,))
 		if not ratings_list:
 			bot.send_message(message.chat.id, 'Вы еще не прикрепляли рейтинг!', message_thread_id= message.message_thread_id)
 			return 0
@@ -116,7 +118,7 @@ def show_rating_table(message):
 def delete_rating_link(message):
 	try:
 		add_this_chat_if_not_exist(message.chat.id)
-		ratings_list = fetch_all(F'SELECT pantheon_name, pantheon_id FROM links WHERE chat_id = {message.chat.id}')
+		ratings_list = fetch_all("SELECT pantheon_name, pantheon_id FROM links WHERE chat_id = ?", (message.chat.id,))
 		if not ratings_list:
 			bot.send_message(message.chat.id, 'Вы еще не прикрепляли рейтинг!', message_thread_id= message.message_thread_id)
 			return 0
@@ -133,7 +135,7 @@ def delete_rating_link(message):
 def rating_table_settings(message):
 	try:
 		add_this_chat_if_not_exist(message.chat.id)
-		ratings_list = fetch_all(F'SELECT pantheon_name, pantheon_id FROM links WHERE chat_id = {message.chat.id}')
+		ratings_list = fetch_all("SELECT pantheon_name, pantheon_id FROM links WHERE chat_id = ?", (message.chat.id,))
 		if not ratings_list:
 			bot.send_message(message.chat.id, 'Вы еще не прикрепляли рейтинг!', message_thread_id= message.message_thread_id)
 			return 0
@@ -149,7 +151,7 @@ def rating_table_settings(message):
 def yaku_stats(message):
 	try:
 		add_this_chat_if_not_exist(message.chat.id)
-		ratings_list = fetch_all(F'SELECT pantheon_name, pantheon_id FROM links WHERE chat_id = {message.chat.id}')
+		ratings_list = fetch_all("SELECT pantheon_name, pantheon_id FROM links WHERE chat_id = ?", (message.chat.id,))
 		if not ratings_list:
 			bot.send_message(message.chat.id, 'Вы еще не прикрепляли рейтинг!', message_thread_id= message.message_thread_id)
 			return 0
@@ -169,10 +171,10 @@ def set_auto_weekly_poll(message):
         chat_id = message.chat.id
         topic_id = 0 if message.message_thread_id is None else message.message_thread_id
         
-        is_this_chat_have_auto_poll = fetch_one(f"SELECT poll_type FROM weekly_poll WHERE chat_id = {chat_id} AND topic_id = {topic_id}")
+        is_this_chat_have_auto_poll = fetch_one("SELECT poll_type FROM weekly_poll WHERE chat_id = ? AND topic_id = ?", (chat_id, topic_id))
         
         if not is_this_chat_have_auto_poll:
-            simple_execute(f"INSERT INTO weekly_poll (chat_id, topic_id, poll_type) VALUES ({chat_id}, {topic_id}, 'normal')")
+            simple_execute("INSERT INTO weekly_poll (chat_id, topic_id, poll_type) VALUES (?, ?, 'normal')", (chat_id, topic_id))
             bot.send_message(
                 message.chat.id, 
                 'Теперь в этом чате каждую неделю будут создаваться обычные опросы на игру!', 
@@ -180,14 +182,14 @@ def set_auto_weekly_poll(message):
             )
         elif is_this_chat_have_auto_poll[0] == "ex":
             # ИСПРАВЛЕНО: меняем с ex на normal
-            simple_execute(f"UPDATE weekly_poll SET poll_type = 'normal' WHERE chat_id = {chat_id} AND topic_id = {topic_id}")
+            simple_execute("UPDATE weekly_poll SET poll_type = 'normal' WHERE chat_id = ? AND topic_id = ?", (chat_id, topic_id))
             bot.send_message(
                 message.chat.id, 
                 'Тип опроса изменен с "расширенного" на "обычный"', 
                 message_thread_id=message.message_thread_id
             )
         elif is_this_chat_have_auto_poll[0] == 'normal':
-            simple_execute(f"DELETE FROM weekly_poll WHERE chat_id = {chat_id} AND topic_id = {topic_id}")
+            simple_execute("DELETE FROM weekly_poll WHERE chat_id = ? AND topic_id = ?", (chat_id, topic_id))
             bot.send_message(
                 message.chat.id, 
                 'Опросы отключены!', 
@@ -210,10 +212,10 @@ def set_auto_weekly_poll_ex(message):
         chat_id = message.chat.id
         topic_id = 0 if message.message_thread_id is None else message.message_thread_id
         
-        is_this_chat_have_auto_poll = fetch_one(f"SELECT poll_type FROM weekly_poll WHERE chat_id = {chat_id} AND topic_id = {topic_id}")
+        is_this_chat_have_auto_poll = fetch_one("SELECT poll_type FROM weekly_poll WHERE chat_id = ? AND topic_id = ?", (chat_id, topic_id))
         
         if not is_this_chat_have_auto_poll:
-            simple_execute(f"INSERT INTO weekly_poll (chat_id, topic_id, poll_type) VALUES ({chat_id}, {topic_id}, 'ex')")
+            simple_execute("INSERT INTO weekly_poll (chat_id, topic_id, poll_type) VALUES (?, ?, 'ex')", (chat_id, topic_id))
             bot.send_message(
                 message.chat.id, 
                 'Теперь в этом чате каждую неделю будут создаваться расширенные опросы на игру!', 
@@ -221,14 +223,14 @@ def set_auto_weekly_poll_ex(message):
             )
         elif is_this_chat_have_auto_poll[0] == "normal":
             # ИСПРАВЛЕНО: меняем с normal на ex
-            simple_execute(f"UPDATE weekly_poll SET poll_type = 'ex' WHERE chat_id = {chat_id} AND topic_id = {topic_id}")
+            simple_execute("UPDATE weekly_poll SET poll_type = 'ex' WHERE chat_id = ? AND topic_id = ?", (chat_id, topic_id))
             bot.send_message(
                 message.chat.id, 
-                '🔄 Тип опроса изменен с "обычного" на "расширенный"', 
+                'Тип опроса изменен с "обычного" на "расширенный"', 
                 message_thread_id=message.message_thread_id
             )
         elif is_this_chat_have_auto_poll[0] == 'ex':
-            simple_execute(f"DELETE FROM weekly_poll WHERE chat_id = {chat_id} AND topic_id = {topic_id}")
+            simple_execute("DELETE FROM weekly_poll WHERE chat_id = ? AND topic_id = ?", (chat_id, topic_id))
             bot.send_message(
                 message.chat.id, 
                 'Опросы отключены!', 
@@ -251,7 +253,7 @@ def answer(callback):
 		return 0
 	if callback_str[0] == "delete_rating_table":
 		try:
-			simple_execute(f'DELETE FROM links WHERE chat_id = {callback_str[1]} AND pantheon_id = {callback_str[2]}')
+			simple_execute("DELETE FROM links WHERE chat_id = ? AND pantheon_id = ?", (callback_str[1], callback_str[2]))
 			bot.send_message(callback.message.chat.id, 'Ссылка на рейтинг удалена!', message_thread_id= callback.message.message_thread_id)
 		except:
 			bot.send_message(callback.message.chat.id, 'Не удалось удалить ссылку!', message_thread_id= callback.message.message_thread_id)
@@ -271,10 +273,10 @@ def answer(callback):
 		bot.send_message(callback.message.chat.id,"Выбор параметров", reply_markup=markup, message_thread_id=callback.message.message_thread_id)
 		return 0
 	if callback_str[0] == 'change_sort_rating_settings':
-		simple_execute(f'UPDATE links SET pantheon_sorting = "{callback_str[1]}" WHERE chat_id = {callback_str[2]} AND pantheon_id = {callback_str[3]}')
+		simple_execute("UPDATE links SET pantheon_sorting = ? WHERE chat_id = ? AND pantheon_id = ?", (callback_str[1], callback_str[2], callback_str[3]))
 		bot.send_message(callback.message.chat.id, f'Теперь таблица сортируется по {callback_str[1]}!', message_thread_id= callback.message.message_thread_id)
 	if callback_str[0] == 'change_filter_rating_settings':
-		simple_execute(f'UPDATE links SET pantheon_filter = "{callback_str[1]}" WHERE chat_id = {callback_str[2]} AND pantheon_id = {callback_str[3]}')
+		simple_execute("UPDATE links SET pantheon_filter = ? WHERE chat_id = ? AND pantheon_id = ?", (callback_str[1], callback_str[2], callback_str[3]))
 		bot.send_message(callback.message.chat.id, f'Теперь таблица фильтруется {"по минимуму игр" if callback_str[1] == "min" else "по всем игрокам"}!', message_thread_id= callback.message.message_thread_id)
 
 

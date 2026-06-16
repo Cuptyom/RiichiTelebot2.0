@@ -4,16 +4,16 @@ from bs4 import BeautifulSoup
 import fake_useragent
 user = fake_useragent.UserAgent().random
 header = {"user-agent": user}
-def rating_parser(a, sort, filter):
+def rating_parser(a, sort, filter_var):
 	try:
 		link = f'https://rating.riichimahjong.org/event/{a}/order/rating'
 		if sort =="":
-			link = a
+			link = f'https://rating.riichimahjong.org/event/{a}/order/rating'
 		elif sort == "avg_score":
 			link = link.replace("order/rating", "order/avg_score")
 		elif sort =="avg_place":
 			link = link.replace("order/rating", "order/avg_place")
-		if filter =="min":
+		if filter_var =="min":
 			link +="/filter/min"
 		responce = requests.get(link, headers = header).text
 		soup = BeautifulSoup(responce, "lxml")
@@ -35,7 +35,7 @@ def rating_parser(a, sort, filter):
 				main9 = main8.find('span', class_="m_5add502a mantine-Badge-label").text
 				games = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[3]
 				games = games.find('span', class_="m_5add502a mantine-Badge-label").text
-				ans += f"{i // 2}){main6}. Счёт {main9}. Игр {games}\n"
+				ans += f"{i // 2}){main6}. Ср. счёт {main9}. Игр {games}\n"
 			elif sort =="avg_place":
 				main7 = main3.find_all('div', class_="m_4081bf90 mantine-Group-root")[i + 1]
 				main8 = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[2]
