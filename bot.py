@@ -5,7 +5,6 @@ from days import *
 from rating import *
 from panteonStats import *
 from rating_name import *
-from tempai import *
 import time
 from API import token
 from help import help_info
