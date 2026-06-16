@@ -11,6 +11,8 @@ from API import token
 from help import help_info
 from database import *
 import schedule
+import threading
+import time
 
 # токен бота
 bot = telebot.TeleBot(token)
@@ -28,10 +30,28 @@ def add_this_chat_if_not_exist(chat_id):
 
 #функция, проверяющая времяд для опросов
 def send_weekly_polls_in_chats():
-	chats = fetch_all(f'SELECT * FROM weekly_poll')
-
+	chats = fetch_all(f'SELECT chat_id, topic_id, poll_type FROM weekly_poll')
 	for chat in chats:
-		pass
+		time.sleep(1) #чтобы не нагружать слабую машину
+		if chat[2] == 'normal':
+			bot.send_poll(chat[0], 'Играем?', this_week(), is_anonymous = False, allows_multiple_answers = True, message_thread_id= chat[1])
+		else:
+			for i in range(7):
+				data = this_day(i)
+				bot.send_poll(chat[0], data[0], data[1:], is_anonymous = False, allows_multiple_answers = True, message_thread_id= chat[1])
+#шедулер для проверки времени
+def scheduler():
+    """Запускает планировщик в отдельном потоке."""
+    #schedule.every().monday.at("00:01").do(send_weekly_polls_in_chats)
+    # Для отладки можно раскомментировать:
+    schedule.every(1).minutes.do(send_weekly_polls_in_chats)
+    while True:
+        schedule.run_pending()
+        time.sleep(10)
+# Запуск планировщика в демоническом потоке (завершится при завершении главного)
+scheduler_thread = threading.Thread(target=scheduler, daemon=True)
+scheduler_thread.start()
+
 
 #ОСНОВНЫЕ ФУНКЦИИ БОТА
 #опрос этой недели
