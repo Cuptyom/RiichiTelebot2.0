@@ -28,8 +28,8 @@ def achievements(getted_id):
 				if len(achieve_players) == 0:
 					continue
 				achieve_value = achieve.find('span', class_='m_5add502a mantine-Badge-label')
-				answer += f'{achieve_name.text}\n'
-				answer += f'{achieve_desk.text}\n'
+				answer += f'{achievements_list.index(achieve) + 1}) {achieve_name.text}\n'
+				answer += f'- {achieve_desk.text}\n'
 				if not achieve_value.text and len(achieve_players) > 0:
 					try:
 						max_val = [i for i in achieve_players[0].text.split() if i.isdigit() or isfloat(i)][0]
