@@ -11,6 +11,7 @@ from help import help_info
 from database import *
 import schedule
 import threading
+from achievements import *
 
 # токен бота
 bot = telebot.TeleBot(token)
@@ -162,6 +163,23 @@ def yaku_stats(message):
 		bot.send_message(message.chat.id, 'вывести список прикрепленных рейтингов не удалось!', message_thread_id= message.message_thread_id)
 
 
+#статистика по ачивкам
+@bot.message_handler(commands=['achievements_stats'])
+def achievements_stats(message):
+	try:
+		add_this_chat_if_not_exist(message.chat.id)
+		ratings_list = fetch_all("SELECT pantheon_name, pantheon_id FROM links WHERE chat_id = ?", (message.chat.id,))
+		if not ratings_list:
+			bot.send_message(message.chat.id, 'Вы еще не прикрепляли рейтинг!', message_thread_id= message.message_thread_id)
+			return 0
+		markup = types.InlineKeyboardMarkup()
+		for rating in ratings_list:
+			markup.add(types.InlineKeyboardButton(text=f"{rating[0]}", callback_data=f'achievements_stats|{rating[1]}'))
+		bot.send_message(message.chat.id,"Выбор рейтинга", reply_markup=markup, message_thread_id=message.message_thread_id)
+	except:
+		bot.send_message(message.chat.id, 'вывести список прикрепленных рейтингов не удалось!', message_thread_id= message.message_thread_id)
+
+
 #автоустановка простых еженедельных опросов
 @bot.message_handler(commands=['set_auto_weekly_poll'])
 def set_auto_weekly_poll(message):
@@ -260,6 +278,10 @@ def answer(callback):
 	if callback_str[0] == "yaku_stats":
 		bot.send_message(callback.message.chat.id, 'обработка началась. Это может занять время...', message_thread_id= callback.message.message_thread_id)
 		yaku_statistic = yaku_stat(callback_str[1])
+		bot.send_message(callback.message.chat.id, yaku_statistic, message_thread_id= callback.message.message_thread_id)
+		return 0
+	if callback_str[0] == "achievements_stats":
+		yaku_statistic = achievements(callback_str[1])
 		bot.send_message(callback.message.chat.id, yaku_statistic, message_thread_id= callback.message.message_thread_id)
 		return 0
 	if callback_str[0] == "rating_table_settings":
