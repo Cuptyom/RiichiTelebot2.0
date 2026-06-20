@@ -49,13 +49,16 @@ def yaku_stat(getted_id):
             yaku_list+=[[count_yaku,yaku_name]]
         all_yaku = 0
         for page in range(1, int(num_of_page) + 1):
-            link = f"https://rating.riichimahjong.org/event/{getted_id}/games/page/{page}"
-            responce = requests.get(link, headers=header).text
-            soup = BeautifulSoup(responce, "lxml")
-            txt = soup.find_all("ul", class_="m_abbac491 mantine-List-root")
-            for i in txt:
-                a = str(i.text)
-                all_yaku += a.count("東") + a.count("南")
+            try:
+                link = f"https://rating.riichimahjong.org/event/{getted_id}/games/page/{page}"
+                responce = requests.get(link, headers=header).text
+                soup = BeautifulSoup(responce, "lxml")
+                txt = soup.find_all("ul", class_="m_abbac491 mantine-List-root")
+                for i in txt:
+                    a = str(i.text)
+                    all_yaku += a.count("東") + a.count("南")
+            except:
+                continue
         a = ''
         yaku_list = sorted(yaku_list, reverse = True)
         for i in yaku_list:

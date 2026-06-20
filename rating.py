@@ -25,32 +25,35 @@ def rating_parser(a, sort, filter_var):
 		last_n = len(main3.find_all('div', class_="m_4081bf90 mantine-Group-root"))
 		ans = ''
 		for i in range(2, last_n,2):
-			#поиск имя
-			main4 = main3.find_all('div', class_="m_4081bf90 mantine-Group-root")[i]
-			main5 = main4.find('div', class_="m_6d731127 mantine-Stack-root")
-			main6 = main5.find('a').text
-			if sort =="avg_score":
-				main7 = main3.find_all('div', class_="m_4081bf90 mantine-Group-root")[i + 1]
-				main8 = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[1]
-				main9 = main8.find('span', class_="m_5add502a mantine-Badge-label").text
-				games = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[3]
-				games = games.find('span', class_="m_5add502a mantine-Badge-label").text
-				ans += f"{i // 2}){main6}. Ср. счёт {main9}. Игр {games}\n"
-			elif sort =="avg_place":
-				main7 = main3.find_all('div', class_="m_4081bf90 mantine-Group-root")[i + 1]
-				main8 = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[2]
-				main9 = main8.find('span', class_="m_5add502a mantine-Badge-label").text
-				games = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[3]
-				games = games.find('span', class_="m_5add502a mantine-Badge-label").text
-				ans += f"{i // 2}){main6}. Место {main9}. Игр {games}\n"
-			else:
-				#поиск рейтинга
-				main7 = main3.find_all('div', class_="m_4081bf90 mantine-Group-root")[i+1]
-				main8 = main7.find("div", class_="m_347db0ec mantine-Badge-root")
-				main9 = main8.find('span',class_="m_5add502a mantine-Badge-label").text
-				games = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[3]
-				games = games.find('span', class_="m_5add502a mantine-Badge-label").text
-				ans += f"{i//2}){main6}. Рейтинг {main9}. Игр {games}\n"
+			try:
+				#поиск имя
+				main4 = main3.find_all('div', class_="m_4081bf90 mantine-Group-root")[i]
+				main5 = main4.find('div', class_="m_6d731127 mantine-Stack-root")
+				main6 = main5.find('a').text
+				if sort =="avg_score":
+					main7 = main3.find_all('div', class_="m_4081bf90 mantine-Group-root")[i + 1]
+					main8 = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[1]
+					main9 = main8.find('span', class_="m_5add502a mantine-Badge-label").text
+					games = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[3]
+					games = games.find('span', class_="m_5add502a mantine-Badge-label").text
+					ans += f"{i // 2}){main6}. Ср. счёт {main9}. Игр {games}\n"
+				elif sort =="avg_place":
+					main7 = main3.find_all('div', class_="m_4081bf90 mantine-Group-root")[i + 1]
+					main8 = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[2]
+					main9 = main8.find('span', class_="m_5add502a mantine-Badge-label").text
+					games = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[3]
+					games = games.find('span', class_="m_5add502a mantine-Badge-label").text
+					ans += f"{i // 2}){main6}. Место {main9}. Игр {games}\n"
+				else:
+					#поиск рейтинга
+					main7 = main3.find_all('div', class_="m_4081bf90 mantine-Group-root")[i+1]
+					main8 = main7.find("div", class_="m_347db0ec mantine-Badge-root")
+					main9 = main8.find('span',class_="m_5add502a mantine-Badge-label").text
+					games = main7.find_all("div", class_="m_347db0ec mantine-Badge-root")[3]
+					games = games.find('span', class_="m_5add502a mantine-Badge-label").text
+					ans += f"{i//2}){main6}. Рейтинг {main9}. Игр {games}\n"
+			except:
+				continue
 		if ans !="":
 			return ans
 		else:
