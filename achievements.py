@@ -49,3 +49,6 @@ def achievements(getted_id):
 		return answer
 	except:
 		return "Получить статистику по достижениям не удалось!"
+
+if __name__ == "__main__":
+	print(achievements(875))
