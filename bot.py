@@ -41,7 +41,7 @@ def send_weekly_polls_in_chats():
 					bot.send_poll(chat[0], data[0], data[1:], is_anonymous = False, allows_multiple_answers = True, message_thread_id= chat[1])
 	except:
 		pass
-#шедулер для проверки времени
+#шедулер для проверки времени и отправки еженедельных опросов
 def scheduler():
     """Запускает планировщик в отдельном потоке."""
     schedule.every().monday.at("00:01").do(send_weekly_polls_in_chats)
@@ -50,7 +50,7 @@ def scheduler():
     while True:
         schedule.run_pending()
         time.sleep(10)
-# Запуск планировщика в демоническом потоке (завершится при завершении главного)
+# Запуск планировщика в демоническом потоке (завершится при завершении главного) // это писал гпт
 scheduler_thread = threading.Thread(target=scheduler, daemon=True)
 scheduler_thread.start()
 
